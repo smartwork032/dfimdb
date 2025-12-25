@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome - Winter Celebration</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Weather Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Modern Reset & Base Styles */
         body, html {
@@ -13,9 +15,87 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #020204; /* Deep dark background */
-            background: radial-gradient(circle at bottom, #1b2735 0%, #090a0f 100%);
             font-family: 'Montserrat', sans-serif;
+            transition: background 2s ease;
+        }
+
+        /* --- Dynamic Background Themes & Color Variables --- */
+        
+        /* DEFAULT (Base variables) */
+        :root {
+            --text-gradient-start: #ffffff;
+            --text-gradient-end: #a5b4fc;
+            --text-secondary: #e2e8f0;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --icon-color: rgba(255, 255, 255, 0.6);
+            --highlight-color: #818cf8;
+        }
+
+        body.theme-night {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            
+            /* Light text for dark background */
+            --text-gradient-start: #ffffff;
+            --text-gradient-end: #a5b4fc;
+            --text-secondary: #e2e8f0;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --icon-color: rgba(255, 255, 255, 0.6);
+            --highlight-color: #818cf8;
+        }
+
+        body.theme-morning {
+            background: linear-gradient(135deg, #a18cd1, #fbc2eb, #8fd3f4);
+            background-size: 400% 400%;
+            animation: gradientBG 20s ease infinite;
+
+            /* Dark text for light background */
+            --text-gradient-start: #2c3e50;
+            --text-gradient-end: #4a69bd;
+            --text-secondary: #2c3e50;
+            --glass-bg: rgba(255, 255, 255, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --icon-color: rgba(0, 0, 0, 0.6);
+            --highlight-color: #6c5ce7;
+        }
+
+        body.theme-day {
+            background: linear-gradient(135deg, #2980b9, #6dd5fa, #ffffff);
+            background-size: 400% 400%;
+            animation: gradientBG 20s ease infinite;
+
+            /* Dark blue text for bright background */
+            --text-gradient-start: #0a3d62;
+            --text-gradient-end: #1e3799;
+            --text-secondary: #0c2461;
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --icon-color: rgba(0, 0, 0, 0.7);
+            --highlight-color: #0a3d62;
+        }
+
+        body.theme-sunset {
+            background: linear-gradient(135deg, #35122a, #ff512f, #dd2476);
+            background-size: 400% 400%;
+            animation: gradientBG 20s ease infinite;
+
+            /* Warm light text for sunset */
+            --text-gradient-start: #ffffff;
+            --text-gradient-end: #ffd3b6;
+            --text-secondary: #ffeaa7;
+            --glass-bg: rgba(0, 0, 0, 0.2);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --icon-color: rgba(255, 255, 255, 0.8);
+            --highlight-color: #fdcb6e;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         /* Canvas Positioning */
@@ -34,7 +114,7 @@
 
         #canvas-snow {
             z-index: 2;
-            pointer-events: none; /* Let clicks pass through to potential interactive elements */
+            pointer-events: none;
         }
 
         /* Centered Text Container */
@@ -45,38 +125,188 @@
             transform: translate(-50%, -50%);
             z-index: 10;
             text-align: center;
-            width: 100%;
-            pointer-events: none; /* Allow seeing fireworks behind */
+            width: 90%;
+            max-width: 800px;
+            /* Using Variables for dynamic card look */
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            padding: 40px 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+            transition: all 0.5s ease;
+        }
+
+        /* Allow clicking buttons/text inside the wrapper */
+        .content-wrapper > * {
+            pointer-events: auto;
         }
 
         /* Modern Typography Animation */
         .welcome-text {
-            color: #ffffff;
-            font-size: clamp(3rem, 10vw, 8rem); /* Responsive font size */
+            font-size: clamp(3rem, 10vw, 7rem);
             font-weight: 200;
-            letter-spacing: 0.2em;
+            letter-spacing: 0.15em;
             text-transform: uppercase;
             margin: 0;
             opacity: 0;
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+            
+            /* Gradient Text Fill using Variables */
+            background: linear-gradient(to bottom right, var(--text-gradient-start), var(--text-gradient-end));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            
+            filter: drop-shadow(0 2px 10px rgba(0,0,0,0.1));
             animation: fadeInZoom 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
         .welcome-text span {
             font-weight: 600;
-            color: #fff;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
-                         0 0 40px rgba(74, 144, 226, 0.6);
+            /* Slight variation for the span part if needed, currently same as parent gradient or white */
+            background: linear-gradient(to bottom right, var(--text-gradient-start), #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
         }
 
         .sub-text {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: clamp(0.8rem, 2vw, 1.2rem);
-            margin-top: 20px;
-            letter-spacing: 0.1em;
+            /* Using Variable */
+            color: var(--text-secondary);
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            margin-top: 25px;
+            margin-bottom: 35px;
+            letter-spacing: 0.05em;
+            line-height: 1.6;
+            font-weight: 400; /* Increased weight slightly for readability */
             opacity: 0;
-            animation: slideUp 1.5s ease-out 1s forwards;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            animation: slideUp 1.5s ease-out 0.8s forwards;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
+
+        .highlight {
+            color: var(--highlight-color);
+            font-weight: 600;
+        }
+
+        /* CTA Button */
+        .cta-button {
+            display: inline-block;
+            padding: 16px 45px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #fff;
+            background: linear-gradient(45deg, #4f46e5, #ec4899);
+            background-size: 200% auto;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+            opacity: 0;
+            animation: slideUp 1.5s ease-out 1.5s forwards;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.6);
+            background-position: right center;
+        }
+
+        .cta-button:active {
+            transform: translateY(1px);
+        }
+
+        /* Footer Credits */
+        .footer-credits {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            text-align: center;
+            
+            /* Glassmorphism Style with Variables */
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            
+            border-radius: 50px;
+            padding: 10px 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+            color: var(--text-secondary); /* Dynamic Color */
+            font-size: 0.75rem;
+            z-index: 11;
+            pointer-events: auto;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* --- Time Control Widget --- */
+        .time-control {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.1); /* Keep widget neutral */
+            backdrop-filter: blur(5px);
+            padding: 8px;
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .time-btn {
+            background: transparent;
+            border: none;
+            color: var(--icon-color); /* Dynamic Icon Color */
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .time-btn:hover, .time-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            color: #fff; /* Active state always white/bright */
+            transform: scale(1.1);
+        }
+        
+        /* Specific fix for Day mode active button readability */
+        body.theme-day .time-btn.active,
+        body.theme-morning .time-btn.active {
+             color: #2c3e50;
+        }
+
+        .current-weather-label {
+            position: absolute;
+            top: 75px;
+            right: 35px;
+            color: var(--text-secondary); /* Dynamic Color */
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 19;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+
 
         /* Animations */
         @keyframes fadeInZoom {
@@ -104,7 +334,7 @@
         }
     </style>
 </head>
-<body>
+<body class="theme-night">
 
     <!-- Layer 1: Fireworks -->
     <canvas id="canvas-fireworks"></canvas>
@@ -112,13 +342,75 @@
     <!-- Layer 2: Snow -->
     <canvas id="canvas-snow"></canvas>
 
+    <!-- UI: Time Controls -->
+    <div class="time-control">
+        <button class="time-btn" onclick="setTheme('morning')" title="Morning"><i class="fas fa-sun"></i></button>
+        <button class="time-btn" onclick="setTheme('day')" title="Day"><i class="fas fa-snowflake"></i></button>
+        <button class="time-btn" onclick="setTheme('sunset')" title="Sunset"><i class="fas fa-cloud-sun"></i></button>
+        <button class="time-btn active" onclick="setTheme('night')" title="Night"><i class="fas fa-moon"></i></button>
+    </div>
+    <div id="weather-label" class="current-weather-label">Current: Night</div>
+
     <!-- Layer 3: Text Content -->
     <div class="content-wrapper">
         <h1 class="welcome-text">Wel<span>come</span></h1>
-        <p class="sub-text">Enjoy the view</p>
+        <p class="sub-text">
+            Step into a world where <span class="highlight">imagination</span> has no limits. 
+            The sky is just the beginning of our journey.
+        </p>
+        <button class="cta-button" onclick="launchFinale()">Ignite the Sky</button>
+    </div>
+
+    <!-- Layer 4: Footer Credits -->
+    <div class="footer-credits">
+        Created by Dudefilms Team 🎬
     </div>
 
     <script>
+        /**
+         * THEME / TIME SYSTEM
+         */
+        function initTheme() {
+            const hour = new Date().getHours();
+            let theme = 'night';
+
+            if (hour >= 5 && hour < 12) {
+                theme = 'morning';
+            } else if (hour >= 12 && hour < 17) {
+                theme = 'day';
+            } else if (hour >= 17 && hour < 20) {
+                theme = 'sunset';
+            } else {
+                theme = 'night';
+            }
+            
+            setTheme(theme);
+        }
+
+        function setTheme(themeName) {
+            // Update Body Class
+            document.body.className = `theme-${themeName}`;
+
+            // Update Active Button
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            // Find button roughly by icon mapping or index (simplified here)
+            const btnMap = { 'morning': 0, 'day': 1, 'sunset': 2, 'night': 3 };
+            const btns = document.querySelectorAll('.time-btn');
+            if(btns[btnMap[themeName]]) btns[btnMap[themeName]].classList.add('active');
+
+            // Update Label
+            document.getElementById('weather-label').innerText = `Current: ${themeName.charAt(0).toUpperCase() + themeName.slice(1)}`;
+
+            // Adjust Canvas Blend Mode based on brightness
+            // 'lighter' looks bad on white backgrounds (Day/Morning)
+            if (themeName === 'day' || themeName === 'morning') {
+                fwCtx.globalCompositeOperation = 'source-over'; 
+            } else {
+                // Keep lighter for night/sunset to make colors pop
+                fwCtx.globalCompositeOperation = 'lighter'; 
+            }
+        }
+
         /**
          * FIREWORKS SYSTEM
          */
@@ -154,7 +446,6 @@
                 this.speed = 2;
                 this.acceleration = 1.05;
                 this.brightness = random(50, 70);
-                // Target radius circle
                 this.targetRadius = 1;
             }
 
@@ -162,7 +453,6 @@
                 this.coordinates.pop();
                 this.coordinates.unshift([this.x, this.y]);
 
-                // Speed up
                 this.speed *= this.acceleration;
 
                 const vx = Math.cos(this.angle) * this.speed;
@@ -201,7 +491,7 @@
                 this.friction = 0.95;
                 this.gravity = 1;
                 this.hue = random(hue - 50, hue + 50);
-                this.brightness = random(50, 80);
+                this.brightness = random(60, 90); 
                 this.alpha = 1;
                 this.decay = random(0.015, 0.03);
             }
@@ -229,7 +519,7 @@
         }
 
         function createParticles(x, y) {
-            let particleCount = 30;
+            let particleCount = 40; 
             while (particleCount--) {
                 particles.push(new Particle(x, y));
             }
@@ -242,11 +532,28 @@
         let timerTick = 0;
 
         function loopFireworks() {
-            // Trail effect
-            fwCtx.globalCompositeOperation = 'destination-out';
+            // Need to handle clearRect/fillRect based on composite operation
+            // Since we switch between source-over and lighter
+            
+            // For Trail Effect:
             fwCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            fwCtx.fillRect(0, 0, fwWidth, fwHeight);
-            fwCtx.globalCompositeOperation = 'lighter';
+            // If theme is day/morning, we need a lighter trail color or clear
+            // But simple darkening works best for fireworks visibility
+            
+            // Check current composite mode to decide trail strategy
+            if (fwCtx.globalCompositeOperation === 'source-over') {
+                 // In Day mode (source-over), we need to clear transparently 
+                 // effectively fading out.
+                 fwCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Faint trail
+                 fwCtx.globalCompositeOperation = 'destination-out';
+                 fwCtx.fillRect(0, 0, fwWidth, fwHeight);
+                 fwCtx.globalCompositeOperation = 'source-over';
+            } else {
+                // Night mode (lighter)
+                fwCtx.globalCompositeOperation = 'destination-out';
+                fwCtx.fillRect(0, 0, fwWidth, fwHeight);
+                fwCtx.globalCompositeOperation = 'lighter';
+            }
 
             hue += 0.5;
 
@@ -282,6 +589,17 @@
             requestAnimationFrame(loopFireworks);
         }
 
+        // Button action
+        function launchFinale() {
+            for(let i=0; i<5; i++) {
+                setTimeout(() => {
+                    const targetX = random(fwWidth * 0.2, fwWidth * 0.8);
+                    const targetY = random(fwHeight * 0.1, fwHeight * 0.4);
+                    fireworks.push(new Firework(fwWidth / 2, fwHeight, targetX, targetY));
+                }, i * 200);
+            }
+        }
+
         /**
          * SNOW SYSTEM
          */
@@ -302,9 +620,9 @@
 
             reset() {
                 this.x = Math.random() * snWidth;
-                this.y = Math.random() * -snHeight; // Start above screen
-                this.vx = Math.random() * 1 - 0.5; // Drift left/right
-                this.vy = Math.random() * 1 + 1;   // Fall speed
+                this.y = Math.random() * -snHeight; 
+                this.vx = Math.random() * 1 - 0.5; 
+                this.vy = Math.random() * 1 + 1;   
                 this.size = Math.random() * 2 + 1;
                 this.opacity = Math.random() * 0.5 + 0.3;
             }
@@ -312,8 +630,6 @@
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
-
-                // Reset if out of bounds
                 if (this.y > snHeight) {
                     this.reset();
                 }
@@ -327,7 +643,6 @@
             }
         }
 
-        // Initialize Snow
         for (let i = 0; i < maxSnowflakes; i++) {
             snowflakes.push(new Snowflake());
         }
@@ -348,6 +663,7 @@
          */
         
         // Start Loops
+        initTheme(); // Set initial theme based on actual time
         loopFireworks();
         loopSnow();
 
@@ -364,9 +680,10 @@
             snCanvas.height = snHeight;
         });
 
-        // Click to launch firework
         window.addEventListener('mousedown', (e) => {
-            fireworks.push(new Firework(fwWidth / 2, fwHeight, e.clientX, e.clientY));
+            if(e.target.tagName === 'CANVAS') {
+                fireworks.push(new Firework(fwWidth / 2, fwHeight, e.clientX, e.clientY));
+            }
         });
 
     </script>
