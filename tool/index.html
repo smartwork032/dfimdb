@@ -15,7 +15,7 @@
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
                         slate: { 850: '#1e293b', 900: '#0f172a', 950: '#020617' },
-                        primary: { 500: '#6366f1', 600: '#4f46e5' }
+                        gray: { 850: '#1f2937', 900: '#111827' } // For Episode DL compatibility
                     }
                 }
             }
@@ -36,46 +36,48 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
+        /* Styles from IMDB Tool */
         .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(51, 65, 85, 0.5);
+            background: rgba(31, 41, 55, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
         }
-        
+
+        /* Sidebar Styles */
         .nav-item.active {
             background-color: #4f46e5;
             color: white;
             box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(79, 70, 229, 0.1);
         }
 
-        /* Fade Animation */
-        .tab-content { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        /* Tab Logic */
+        .tab-content { display: none; opacity: 0; transition: opacity 0.2s ease-in-out; }
         .tab-content.active { display: block; opacity: 1; }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden">
+<body class="h-screen flex overflow-hidden bg-slate-950">
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR (New Option to Manage Files) -->
     <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col flex-shrink-0 z-20">
         <div class="h-16 flex items-center px-6 border-b border-slate-800">
             <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
-                DudeFilms <span class="text-xs text-slate-500 font-normal ml-1">Toolkit</span>
+                DudeFilms <span class="text-xs text-slate-500 font-normal ml-1">Manager</span>
             </h1>
         </div>
         
         <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
             <button onclick="switchTab('imdb')" id="nav-imdb" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all group active">
-                <i class="fa-solid fa-clapperboard text-lg w-6 text-center group-hover:scale-110 transition-transform"></i>
+                <i class="fa-solid fa-clapperboard text-lg w-6 text-center"></i>
                 <span class="font-medium">IMDB Generator</span>
             </button>
             
             <button onclick="switchTab('post')" id="nav-post" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all group">
-                <i class="fa-solid fa-link text-lg w-6 text-center group-hover:scale-110 transition-transform"></i>
+                <i class="fa-solid fa-link text-lg w-6 text-center"></i>
                 <span class="font-medium">Post Links</span>
             </button>
             
             <button onclick="switchTab('episode')" id="nav-episode" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all group">
-                <i class="fa-solid fa-layer-group text-lg w-6 text-center group-hover:scale-110 transition-transform"></i>
+                <i class="fa-solid fa-layer-group text-lg w-6 text-center"></i>
                 <span class="font-medium">Episode Links</span>
             </button>
         </nav>
@@ -88,195 +90,240 @@
         </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 overflow-hidden relative bg-slate-950 flex flex-col">
-        
-        <!-- Header Mobile (Optional/Simple) -->
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 overflow-hidden relative flex flex-col">
+        <!-- Header Mobile -->
         <div class="md:hidden h-16 bg-slate-900 border-b border-slate-800 flex items-center px-4">
              <span class="font-bold text-white">DudeFilms Tools</span>
         </div>
 
-        <!-- SCROLLABLE AREA -->
         <div class="flex-1 overflow-y-auto p-4 md:p-8">
             <div class="max-w-7xl mx-auto">
 
                 <!-- ==================== TAB 1: IMDB GENERATOR ==================== -->
-                <div id="tab-imdb" class="tab-content active space-y-6">
-                    <header class="mb-8">
-                        <h2 class="text-2xl font-bold text-white mb-2">IMDB Post Generator</h2>
-                        <p class="text-slate-400">Fetch movie details and generate HTML formatted posts.</p>
+                <div id="tab-imdb" class="tab-content active">
+                    <!-- Added Title -->
+                    <header class="mb-8 border-b border-slate-800 pb-4">
+                        <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                            IMDB Post Generator
+                        </h2>
                     </header>
 
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        <!-- Left: Inputs -->
+                        <!-- LEFT COLUMN: Inputs -->
                         <div class="lg:col-span-5 space-y-6">
-                            <!-- Fetcher -->
-                            <div class="glass-panel rounded-xl p-6">
-                                <label class="block text-sm font-medium text-slate-400 mb-2">IMDB ID or URL</label>
+                            <!-- ID Fetcher Card -->
+                            <div class="glass-panel rounded-xl p-6 shadow-lg">
+                                <h2 class="text-lg font-semibold mb-4 text-blue-400 flex items-center gap-2">
+                                    <i class="fa-brands fa-imdb text-yellow-500 text-xl"></i> Fetch Details
+                                </h2>
                                 <div class="flex gap-2">
-                                    <input type="text" id="imdb_id" placeholder="tt4154796" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none">
-                                    <button id="btn_imdb_fetch" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Fetch
+                                    <div class="relative w-full">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 text-sm">tt</span>
+                                        </div>
+                                        <input type="text" id="imdb_id" placeholder="4154796" class="w-full pl-8 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-white placeholder-gray-500">
+                                    </div>
+                                    <button id="btn_generate" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition shadow-lg shadow-blue-900/20 flex items-center gap-2 whitespace-nowrap">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                        <span>Fetch</span>
                                     </button>
                                 </div>
+                                <p class="text-xs text-gray-500 mt-2 ml-1">Enter IMDB ID (e.g., tt1234567)</p>
                             </div>
 
-                            <!-- Config -->
-                            <div class="glass-panel rounded-xl p-6 space-y-4">
+                            <!-- Manual Details Card -->
+                            <div class="glass-panel rounded-xl p-6 shadow-lg space-y-5">
+                                <h2 class="text-lg font-semibold mb-2 text-gray-300 border-b border-gray-700 pb-2">Configuration</h2>
+
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-400 mb-1">Quality & Size String</label>
-                                    <input type="text" id="imdb_quality" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:ring-indigo-500 outline-none" value="480p [] || 720p [] || 1080p []">
-                                    <p class="text-xs text-slate-500 mt-1">Format: <code>Quality [Size] || Quality [Size]</code></p>
+                                    <label class="block text-sm font-medium text-gray-400 mb-1">Quality & Size String</label>
+                                    <div class="relative">
+                                        <input type="text" id="quality_size" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition text-white font-mono text-sm" value="480p [] || 720p [] || 1080p []">
+                                    </div>
                                 </div>
+
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-slate-400 mb-1">Language</label>
-                                        <input type="text" id="imdb_lang" list="lang_opts" value="Hindi" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:ring-indigo-500 outline-none">
-                                        <datalist id="lang_opts"><option value="Hindi"><option value="English"><option value="Dual audio {Hindi-English}"><option value="Multi Audio"></datalist>
+                                        <label class="block text-sm font-medium text-gray-400 mb-1">Language</label>
+                                        <input type="text" id="lang" list="lang_options" value="Hindi" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-blue-500 outline-none text-sm placeholder-gray-500">
+                                        <datalist id="lang_options"><option value="Hindi"><option value="English"><option value="Dual audio {Hindi-English}"><option value="Multi Audio"></datalist>
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-slate-400 mb-1">Source</label>
-                                        <input type="text" id="imdb_source" list="source_opts" value="WEB-DL" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:ring-indigo-500 outline-none">
-                                        <datalist id="source_opts"><option value="WEB-DL"><option value="BluRay"><option value="HDTC"></datalist>
+                                        <label class="block text-sm font-medium text-gray-400 mb-1">Source</label>
+                                        <input type="text" id="source" list="source_options" value="WEB-DL" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-blue-500 outline-none text-sm placeholder-gray-500">
+                                        <datalist id="source_options"><option value="WEB-DL"><option value="BluRay"><option value="HDTC"><option value="HDTS"><option value="CamRip"><option value="CamHD"><option value="WebRip"></datalist>
                                     </div>
                                 </div>
+
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-400 mb-1">Subtitles</label>
-                                    <input type="text" id="imdb_subtitle" value="ESubs" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:ring-indigo-500 outline-none">
+                                    <label class="block text-sm font-medium text-gray-400 mb-1">Subtitles</label>
+                                    <input type="text" id="subtitle" value="ESubs" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-blue-500 outline-none text-sm">
                                 </div>
+
                                 <div>
-                                    <div class="flex justify-between mb-1">
-                                        <label class="block text-sm font-medium text-slate-400">Screenshots</label>
-                                        <button onclick="addImdbScreenshot()" class="text-xs text-indigo-400 hover:text-white"><i class="fa-solid fa-plus"></i> Add</button>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <label class="block text-sm font-medium text-gray-400">Screenshot URLs</label>
                                     </div>
-                                    <div id="imdb_screenshots" class="space-y-2">
-                                        <input type="text" class="screenshot-input w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 outline-none" placeholder="Image URL...">
+                                    <div id="screenshot_container" class="space-y-2">
+                                        <div class="flex">
+                                            <input type="text" class="screenshot-input w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:ring-blue-500 outline-none text-sm placeholder-gray-600" placeholder="https://image.url/shot1.jpg">
+                                            <button type="button" onclick="addScreenshotInput()" class="inline-flex items-center px-3 bg-blue-600 border border-l-0 border-blue-600 rounded-r-lg text-white hover:bg-blue-500 transition"><i class="fa-solid fa-plus"></i></button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Right: Outputs -->
+                        <!-- RIGHT COLUMN: Outputs -->
                         <div class="lg:col-span-7 h-full">
-                            <div class="glass-panel rounded-xl p-6 h-full flex flex-col">
-                                <div class="mb-4">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <label class="text-xs font-bold text-slate-500 uppercase">Title</label>
-                                        <button onclick="copyToClipboard('out_imdb_title')" class="text-xs text-indigo-400 hover:text-white"><i class="fa-regular fa-copy"></i> Copy</button>
-                                    </div>
-                                    <input type="text" id="out_imdb_title" readonly class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-green-400 font-mono text-sm outline-none">
+                            <div class="glass-panel rounded-xl p-6 shadow-lg h-full flex flex-col">
+                                <div class="flex items-center justify-between mb-6 border-b border-gray-700 pb-4">
+                                    <h2 class="text-lg font-semibold text-green-400">Generated Output</h2>
                                 </div>
-                                <div class="mb-4">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <label class="text-xs font-bold text-slate-500 uppercase">Poster URL</label>
-                                        <button onclick="copyToClipboard('out_imdb_poster')" class="text-xs text-indigo-400 hover:text-white"><i class="fa-regular fa-copy"></i> Copy</button>
+
+                                <div class="mb-5">
+                                    <div class="flex justify-between items-end mb-1">
+                                        <label class="text-xs uppercase tracking-wider text-gray-500 font-bold">Post Title</label>
+                                        <button onclick="copyToClipboard('out_title')" class="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded transition"><i class="fa-regular fa-copy"></i> Copy</button>
                                     </div>
-                                    <input type="text" id="out_imdb_poster" readonly class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-blue-400 font-mono text-xs outline-none">
+                                    <input type="text" id="out_title" readonly class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-green-400 font-mono text-sm focus:ring-1 focus:ring-green-500 outline-none">
                                 </div>
+
+                                <div class="mb-5">
+                                    <div class="flex justify-between items-end mb-1">
+                                        <label class="text-xs uppercase tracking-wider text-gray-500 font-bold">Poster URL</label>
+                                        <button onclick="copyToClipboard('out_img')" class="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded transition"><i class="fa-regular fa-copy"></i> Copy</button>
+                                    </div>
+                                    <input type="text" id="out_img" readonly class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-blue-300 font-mono text-xs focus:ring-1 focus:ring-blue-500 outline-none">
+                                </div>
+
                                 <div class="flex-grow flex flex-col">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <label class="text-xs font-bold text-slate-500 uppercase">HTML Content</label>
-                                        <button onclick="copyToClipboard('out_imdb_content')" class="text-xs text-indigo-400 hover:text-white"><i class="fa-regular fa-copy"></i> Copy HTML</button>
+                                    <div class="flex justify-between items-end mb-1">
+                                        <label class="text-xs uppercase tracking-wider text-gray-500 font-bold">Post Content (HTML)</label>
+                                        <button onclick="copyToClipboard('out_content')" class="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded transition"><i class="fa-regular fa-copy"></i> Copy HTML</button>
                                     </div>
-                                    <textarea id="out_imdb_content" readonly class="w-full flex-grow min-h-[300px] bg-slate-900 border border-slate-700 rounded-lg p-4 text-slate-300 font-mono text-xs resize-none outline-none"></textarea>
+                                    <textarea id="out_content" readonly class="w-full flex-grow p-4 bg-gray-900 border border-gray-700 rounded-lg text-gray-300 font-mono text-xs leading-relaxed focus:ring-1 focus:ring-gray-500 outline-none resize-none" style="min-height: 300px;"></textarea>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ==================== TAB 2: POST LINK GENERATOR ==================== -->
-                <div id="tab-post" class="tab-content space-y-6">
-                    <header class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-                        <div>
-                            <h2 class="text-2xl font-bold text-white mb-2">Multi-Resolution Link Generator</h2>
-                            <p class="text-slate-400">Generate button shortcodes for WordPress posts across resolutions.</p>
-                        </div>
-                        <button onclick="resetPostDl()" class="px-4 py-2 bg-slate-800 hover:bg-red-900/30 text-slate-400 hover:text-red-400 border border-slate-700 rounded-lg text-sm transition-colors">
-                            <i class="fa-solid fa-rotate-left mr-2"></i> Reset All
-                        </button>
+                <!-- ==================== TAB 2: POST LINKS ==================== -->
+                <div id="tab-post" class="tab-content">
+                    <!-- Added Title -->
+                    <header class="mb-8 text-center">
+                        <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 inline-flex items-center gap-3">
+                            <i data-lucide="globe" class="w-8 h-8 text-blue-500"></i>
+                            DudeFilms Post Link Generator
+                        </h2>
                     </header>
 
-                    <!-- Master Input -->
-                    <div class="glass-panel p-6 rounded-xl mb-8">
-                        <label class="block text-sm font-medium text-slate-400 mb-2">Movie / Post Title (Applies to all cards)</label>
-                        <input id="post_master_title" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-lg text-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none" placeholder="e.g. Spider-Man: No Way Home (2021)" oninput="updatePostDlOutputs()">
+                    <div class="flex flex-col md:flex-row gap-4 items-end mb-8 bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-lg">
+                        <div class="flex-grow w-full">
+                            <label for="post-title" class="block text-sm font-medium text-slate-400 mb-2 ml-1">Movie / Post Title</label>
+                            <input id="post-title" type="text" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-lg text-white focus:ring-2 focus:ring-blue-500 transition-all outline-none placeholder-slate-600" placeholder="e.g. Spider-Man: No Way Home (2021)" oninput="updateAllOutputs()" />
+                        </div>
+                        <button onclick="resetAllPosts()" class="px-6 py-3 rounded-xl bg-slate-800 text-slate-400 hover:text-red-400 border border-slate-700 transition-all font-medium whitespace-nowrap">Clear All</button>
                     </div>
 
-                    <!-- Cards Container -->
-                    <div id="post_cards_container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Cards injected via JS -->
+                    <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- JS Injected Cards -->
                     </div>
                 </div>
 
-                <!-- ==================== TAB 3: EPISODE GENERATOR ==================== -->
-                <div id="tab-episode" class="tab-content space-y-6">
-                    <header class="mb-8">
-                        <h2 class="text-2xl font-bold text-white mb-2">Episode Link Generator</h2>
-                        <p class="text-slate-400">Batch generate links for TV series episodes.</p>
+                <!-- ==================== TAB 3: EPISODE LINKS ==================== -->
+                <div id="tab-episode" class="tab-content">
+                    <!-- Added Title -->
+                    <header class="mb-8 border-b border-slate-800 pb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        <h2 class="text-3xl font-bold text-white">
+                            Episode Link Generator
+                        </h2>
                     </header>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
-                        <!-- Left: Configuration -->
+                        <!-- Left Column: Inputs -->
                         <div class="space-y-6">
-                            <div class="glass-panel rounded-xl p-6">
-                                <h3 class="text-lg font-semibold text-indigo-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-sliders"></i> Config</h3>
+                            <!-- Card: Configuration -->
+                            <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-6">
+                                <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                                    Configuration
+                                </h2>
                                 
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-slate-400 mb-2">Series Title</label>
-                                    <input type="text" id="ep_title" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-indigo-500 outline-none" placeholder="e.g. Breaking Bad S01">
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Post Title</label>
+                                    <input type="text" id="ep_post_title" placeholder="e.g. Breaking Bad Season 1" class="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors">
                                 </div>
 
                                 <div class="mb-2">
-                                    <label class="block text-sm font-medium text-slate-400 mb-2">Source Type</label>
-                                    <input type="text" id="ep_source_type" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-indigo-500 outline-none mb-3" placeholder="Source Name...">
-                                    <div class="flex flex-wrap gap-2">
-                                        <button onclick="setEpSource('G-Workers')" class="px-3 py-1 text-xs bg-slate-700 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-full transition">G-Workers</button>
-                                        <button onclick="setEpSource('G-Drive')" class="px-3 py-1 text-xs bg-slate-700 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-full transition">G-Drive</button>
-                                        <button onclick="setEpSource('HubCloud')" class="px-3 py-1 text-xs bg-slate-700 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-full transition">HubCloud</button>
-                                        <button onclick="setEpSource('Drop')" class="px-3 py-1 text-xs bg-slate-700 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-full transition">Drop</button>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Source Type</label>
+                                    <div class="space-y-3">
+                                        <input type="text" id="ep_source_type" placeholder="e.g. G-Drive" class="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-colors">
+                                        <div class="flex flex-wrap gap-2">
+                                            <button onclick="setEpSourceType('G-Workers')" class="px-3 py-1 text-xs font-medium bg-gray-700 hover:bg-indigo-600 text-gray-300 hover:text-white rounded-full transition-colors border border-gray-600">G-Workers</button>
+                                            <button onclick="setEpSourceType('G-Drive')" class="px-3 py-1 text-xs font-medium bg-gray-700 hover:bg-indigo-600 text-gray-300 hover:text-white rounded-full transition-colors border border-gray-600">G-Drive</button>
+                                            <button onclick="setEpSourceType('WatchOnline')" class="px-3 py-1 text-xs font-medium bg-gray-700 hover:bg-indigo-600 text-gray-300 hover:text-white rounded-full transition-colors border border-gray-600">WatchOnline</button>
+                                            <button onclick="setEpSourceType('HubCloud')" class="px-3 py-1 text-xs font-medium bg-gray-700 hover:bg-indigo-600 text-gray-300 hover:text-white rounded-full transition-colors border border-gray-600">HubCloud</button>
+                                            <button onclick="setEpSourceType('Drop')" class="px-3 py-1 text-xs font-medium bg-gray-700 hover:bg-indigo-600 text-gray-300 hover:text-white rounded-full transition-colors border border-gray-600">Drop</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="glass-panel rounded-xl p-6">
+                            <!-- Card: Episodes -->
+                            <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-6">
                                 <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-lg font-semibold text-indigo-400 flex items-center gap-2"><i class="fa-solid fa-list-ol"></i> Episodes</h3>
+                                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                        Episode Links
+                                    </h2>
                                     <div class="flex gap-2">
-                                        <button onclick="addEpisodeField()" class="p-2 bg-slate-700 hover:bg-slate-600 text-green-400 rounded-lg"><i class="fa-solid fa-plus"></i></button>
-                                        <button onclick="removeEpisodeField()" class="p-2 bg-slate-700 hover:bg-slate-600 text-red-400 rounded-lg"><i class="fa-solid fa-minus"></i></button>
+                                        <button onclick="addEpisode()" class="p-2 bg-gray-700 hover:bg-gray-600 text-green-400 rounded-lg transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></button>
+                                        <button onclick="removeEpisode()" class="p-2 bg-gray-700 hover:bg-gray-600 text-red-400 rounded-lg transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg></button>
                                     </div>
                                 </div>
-                                <div id="ep_inputs_container" class="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+
+                                <div id="episode_container" class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                                     <div class="flex gap-0 group">
-                                        <span class="inline-flex items-center px-4 rounded-l-lg border border-r-0 border-slate-600 bg-slate-700 text-slate-300 text-sm w-28 justify-center">Episode 01</span>
-                                        <input type="text" class="ep-input w-full bg-slate-800 border border-slate-600 rounded-r-lg px-4 py-2 text-white focus:ring-indigo-500 outline-none transition-colors" placeholder="https://...">
+                                        <span class="inline-flex items-center px-4 rounded-l-lg border border-r-0 border-gray-600 bg-gray-700 text-gray-300 text-sm w-28 justify-center">Episode 01</span>
+                                        <input type="text" class="ep-input w-full bg-gray-900 border border-gray-600 rounded-r-lg px-4 py-2 text-white focus:ring-1 focus:ring-indigo-500 outline-none transition-colors" placeholder="https://...">
                                     </div>
                                 </div>
+                                
                                 <div class="mt-6 flex gap-4">
-                                    <button onclick="generateEpisodeCode()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-lg shadow-indigo-500/20">Generate Code</button>
-                                    <button onclick="resetEpisodeDl()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg">Reset</button>
+                                    <button onclick="generateEpCode()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex justify-center items-center gap-2">
+                                        Generate Code
+                                    </button>
+                                    <button onclick="resetEpCode()" class="px-6 py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium rounded-lg transition-colors">Reset</button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Right: Output -->
-                        <div class="glass-panel rounded-xl p-6 flex flex-col h-full">
-                            <h3 class="text-lg font-semibold text-green-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-code"></i> Output</h3>
-                            
-                            <div class="mb-4">
-                                <label class="text-xs font-bold text-slate-500 uppercase">Formatted Title</label>
-                                <div class="relative">
-                                    <input type="text" id="out_ep_title" readonly class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-300 font-mono text-sm outline-none">
-                                    <button onclick="copyToClipboard('out_ep_title')" class="absolute right-2 top-1.5 text-slate-500 hover:text-white"><i class="fa-regular fa-copy"></i></button>
+                        <!-- Right Column: Output -->
+                        <div class="h-full">
+                            <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-6 h-full flex flex-col">
+                                <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    Generated Output
+                                </h2>
+                                <div class="mb-4">
+                                    <label class="text-xs uppercase font-bold text-gray-500 tracking-wider mb-1 block">Formatted Title</label>
+                                    <div class="relative">
+                                        <input type="text" id="ep_result_title" readonly class="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-2 text-gray-300 font-mono text-sm focus:border-indigo-500 outline-none">
+                                        <button onclick="copyToClipboard('ep_result_title')" class="absolute right-2 top-1.5 p-1 text-gray-500 hover:text-white transition-colors"><i class="fa-regular fa-copy"></i></button>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="flex-grow flex flex-col">
-                                <label class="text-xs font-bold text-slate-500 uppercase">Code</label>
-                                <div class="relative flex-grow">
-                                    <textarea id="out_ep_content" readonly class="w-full h-full min-h-[300px] bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-slate-300 font-mono text-sm resize-none outline-none"></textarea>
-                                    <button onclick="copyToClipboard('out_ep_content')" class="absolute right-3 top-3 p-2 bg-slate-800 border border-slate-600 rounded hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"><i class="fa-regular fa-copy"></i></button>
+                                <div class="flex-grow flex flex-col">
+                                    <label class="text-xs uppercase font-bold text-gray-500 tracking-wider mb-1 block">Post Content</label>
+                                    <div class="relative flex-grow">
+                                        <textarea id="ep_result_content" readonly class="w-full h-full min-h-[300px] bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-3 text-gray-300 font-mono text-sm focus:border-indigo-500 outline-none resize-none"></textarea>
+                                        <button onclick="copyToClipboard('ep_result_content')" class="absolute right-3 top-3 p-2 bg-gray-800 border border-gray-600 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"><i class="fa-regular fa-copy"></i></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -287,35 +334,30 @@
         </div>
     </main>
 
-    <!-- TOAST NOTIFICATION -->
+    <!-- Unified Toast Notification -->
     <div id="global-toast" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
         <div class="bg-indigo-600 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3 border border-indigo-500">
             <i class="fa-solid fa-circle-check"></i>
-            <span id="toast-msg" class="font-medium">Notification</span>
+            <span id="toast-msg" class="font-medium">Action Successful</span>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- MAIN SCRIPT -->
     <script>
         // ================= GLOBAL UTILS =================
         function switchTab(tabId) {
-            // Hide all contents
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            // Deactivate all navs
             document.querySelectorAll('.nav-item').forEach(el => {
                 el.classList.remove('active', 'bg-indigo-600', 'text-white', 'shadow-lg');
                 el.classList.add('text-slate-400');
             });
-
-            // Show selected
             document.getElementById(`tab-${tabId}`).classList.add('active');
-            // Activate Nav
             const navBtn = document.getElementById(`nav-${tabId}`);
             navBtn.classList.add('active');
             navBtn.classList.remove('text-slate-400');
         }
 
-        function showToast(message, type = 'success') {
+        function showToast(message = 'Copied to clipboard!', type = 'success') {
             const toast = document.getElementById('global-toast');
             const msgEl = document.getElementById('toast-msg');
             const iconEl = toast.querySelector('i');
@@ -334,60 +376,47 @@
             }
 
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
 
         function copyToClipboard(elementId) {
             const el = document.getElementById(elementId);
             if (!el || !el.value) return;
-            
             el.select();
             el.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(el.value).then(() => showToast('Copied to clipboard!'))
-                .catch(() => {
-                    document.execCommand('copy'); // Fallback
-                    showToast('Copied to clipboard!');
-                });
+            navigator.clipboard.writeText(el.value).then(() => showToast('Copied to clipboard!')).catch(() => document.execCommand('copy'));
         }
 
-        // ================= TOOL 1: IMDB GENERATOR =================
+        // ================= TOOL 1: IMDB LOGIC (Preserved) =================
         const IMDB_API_KEY = "c0d64821";
+        document.getElementById('btn_generate').addEventListener('click', generateImdbPost);
 
-        document.getElementById('btn_imdb_fetch').addEventListener('click', generateImdbPost);
-
-        function addImdbScreenshot() {
-            const container = document.getElementById('imdb_screenshots');
+        function addScreenshotInput() {
+            const container = document.getElementById('screenshot_container');
             const div = document.createElement('div');
-            div.className = 'flex gap-2';
+            div.className = 'flex';
             div.innerHTML = `
-                <input type="text" class="screenshot-input w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 outline-none" placeholder="Image URL...">
-                <button onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 px-2"><i class="fa-solid fa-trash"></i></button>
+                <input type="text" class="screenshot-input w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:ring-blue-500 outline-none text-sm placeholder-gray-600" placeholder="https://image.url/shot.jpg">
+                <button type="button" onclick="this.parentElement.remove()" class="inline-flex items-center px-3 bg-red-600 border border-l-0 border-red-600 rounded-r-lg text-white hover:bg-red-500 transition"><i class="fa-solid fa-trash"></i></button>
             `;
             container.appendChild(div);
         }
 
         async function generateImdbPost() {
             const input = document.getElementById('imdb_id').value.trim();
-            const btn = document.getElementById('btn_imdb_fetch');
-            
-            // Extract ID if full URL
+            const btn = document.getElementById('btn_generate');
             const imdbId = (input.match(/tt\d+/) || [input])[0];
 
             if (!imdbId) return showToast('Invalid IMDB ID', 'error');
 
-            // Loading State
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Fetching...';
             btn.disabled = true;
 
             try {
                 const res = await fetch(`https://www.omdbapi.com/?apikey=${IMDB_API_KEY}&plot=full&i=${imdbId}`);
                 const data = await res.json();
-
                 if (data.Response === "False") throw new Error('Movie not found');
-
                 populateImdbData(data);
                 showToast('Fetched successfully!');
             } catch (err) {
@@ -399,19 +428,17 @@
         }
 
         function populateImdbData(data) {
-            const lang = document.getElementById('imdb_lang').value;
-            const source = document.getElementById('imdb_source').value;
-            const subtitle = document.getElementById('imdb_subtitle').value;
-            const qualityStr = document.getElementById('imdb_quality').value;
+            const lang = document.getElementById('lang').value;
+            const source = document.getElementById('source').value;
+            const subtitle = document.getElementById('subtitle').value;
+            const qualityStr = document.getElementById('quality_size').value;
             const screenshots = Array.from(document.querySelectorAll('.screenshot-input')).map(i => i.value.trim()).filter(v => v);
 
-            // Parse Quality
             const variants = qualityStr.split('||').map(p => {
                 const match = p.trim().match(/^(\d{3,4}p|4k|HD)/i);
                 return match ? match[0] : null;
             }).filter(Boolean);
 
-            // Build Quality Links HTML
             let qualLinks = variants.map(v => `<a href="/category/${v.toLowerCase()}/">${v}</a>`).join(variants.length > 2 ? ", " : " &amp; ");
             if(!qualLinks) qualLinks = `<a href="/category/1080p/">1080p</a>, <a href="/category/720p/">720p</a> &amp; <a href="/category/480p/">480p</a>`;
 
@@ -426,98 +453,84 @@
             }
             html += `<img class="aligncenter" src="https://i.imgur.com/4VtZS20.png" />`;
 
-            document.getElementById('out_imdb_title').value = title;
-            document.getElementById('out_imdb_poster').value = data.Poster;
-            document.getElementById('out_imdb_content').value = html;
+            document.getElementById('out_title').value = title;
+            document.getElementById('out_img').value = data.Poster;
+            document.getElementById('out_content').value = html;
         }
 
-        // ================= TOOL 2: POST LINK GENERATOR =================
+        // ================= TOOL 2: POST LINKS LOGIC (Preserved) =================
         const RESOLUTIONS = ['480p', '720p', '1080p'];
-        const LINK_CONFIG = [
+        const LINK_FIELDS = [
             { key: 'gworkers', label: 'G-Workers', icon: 'server', btnId: '1', btnTxt: 'G-Workers' },
             { key: 'gdrive', label: 'G-Drive (Login)', icon: 'cloud', btnId: '2', btnTxt: '' },
             { key: 'hubcloud', label: 'HubCloud', icon: 'cloud', btnId: '3', btnTxt: 'HubCloud(Fast-Server)' },
             { key: 'dood', label: 'DoodStream', icon: 'video', btnId: '4', btnTxt: '' },
             { key: 'filebee', label: 'FileBee', icon: 'file-archive', btnId: '3', btnTxt: 'FileBee(Fast-Server)' },
-            { key: 'ocd', label: 'One Click', icon: 'download', btnId: '7', btnTxt: '' },
+            { key: 'ocd', label: 'One Click Download', icon: 'download', btnId: '7', btnTxt: '' },
             { key: 'drop', label: 'Drop.Download', icon: 'download', btnId: '3', btnTxt: 'Drop.Download' },
-            { key: 'other', label: 'Other', icon: 'link', btnId: '5', btnTxt: 'Other Download Links' },
+            { key: 'other', label: 'Other Download', icon: 'link', btnId: '5', btnTxt: 'Other Download Links' },
         ];
 
         function initPostDl() {
-            const container = document.getElementById('post_cards_container');
+            const container = document.getElementById('cards-container');
             container.innerHTML = '';
 
             RESOLUTIONS.forEach(res => {
-                const inputsHtml = LINK_CONFIG.map(field => `
-                    <div class="group mb-3">
+                const inputsHtml = LINK_FIELDS.map(field => `
+                    <div class="group mb-4">
                         <div class="flex items-center gap-2 mb-1">
-                            <i data-lucide="${field.icon}" class="w-3 h-3 text-slate-500"></i>
-                            <input type="text" 
-                                class="post-label bg-transparent border-none p-0 text-xs text-slate-400 focus:text-indigo-400 w-full hover:text-white"
-                                value="${field.btnTxt || field.label}"
-                                data-key="${field.key}"
-                                oninput="syncPostLabels(this)"
-                            >
+                            <i data-lucide="${field.icon}" class="w-3 h-3 text-slate-400"></i>
+                            <input type="text" class="post-label bg-transparent border-none p-0 text-xs text-slate-400 focus:text-indigo-400 w-full hover:text-white" value="${field.btnTxt || field.label}" data-key="${field.key}" oninput="syncPostLabels(this)">
                         </div>
-                        <input type="text" 
-                            class="post-url w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-xs text-white focus:border-indigo-500 outline-none"
-                            placeholder="Paste ${field.label} URL"
-                            data-res="${res}"
-                            data-key="${field.key}"
-                            oninput="updatePostDlOutputs()"
-                        >
+                        <input type="text" class="post-url w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 outline-none placeholder-slate-600" placeholder="Paste ${field.label} URL" data-res="${res}" data-key="${field.key}" oninput="updateAllOutputs()">
                     </div>
                 `).join('');
 
-                const card = `
-                    <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden flex flex-col">
+                container.innerHTML += `
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden flex flex-col h-full shadow-lg">
                         <div class="bg-slate-900/50 p-4 border-b border-slate-700 flex justify-between items-center">
-                            <h3 class="font-bold text-indigo-400">${res} Links</h3>
+                            <h2 class="text-xl font-bold text-blue-400 flex items-center gap-2"><i data-lucide="film" class="w-5 h-5"></i> ${res} Links</h2>
                             <span id="count-${res}" class="text-xs bg-slate-800 px-2 py-1 rounded text-slate-500">0 Links</span>
                         </div>
-                        <div class="p-4 flex-grow overflow-y-auto max-h-[300px]">${inputsHtml}</div>
+                        <div class="p-4 flex-grow overflow-y-auto max-h-[400px]">${inputsHtml}</div>
                         <div class="bg-slate-900 p-4 border-t border-slate-700 space-y-3">
                             <div>
-                                <div class="flex justify-between mb-1"><span class="text-[10px] uppercase text-slate-500 font-bold">Title</span><button onclick="copyToClipboard('post_title_${res}')" class="text-xs text-slate-500 hover:text-white"><i class="fa-regular fa-copy"></i></button></div>
-                                <div id="post_title_${res}" class="bg-slate-800 p-2 rounded text-xs text-slate-300 font-mono border border-slate-700 h-8 overflow-hidden whitespace-nowrap"></div>
+                                <div class="flex justify-between mb-1"><span class="text-xs font-semibold text-slate-500 uppercase">Title</span><button onclick="copyToClipboard('post_title_${res}')" class="text-xs text-slate-400 hover:text-white"><i class="fa-regular fa-copy"></i></button></div>
+                                <div id="post_title_${res}" class="bg-slate-800 p-2 rounded text-sm text-slate-300 font-mono border border-slate-700 overflow-hidden whitespace-nowrap min-h-[38px] flex items-center"><span class="text-slate-600 italic">Enter Post Title...</span></div>
                             </div>
                             <div>
-                                <div class="flex justify-between mb-1"><span class="text-[10px] uppercase text-slate-500 font-bold">Code</span><button onclick="copyToClipboard('post_code_${res}')" class="text-xs text-slate-500 hover:text-white"><i class="fa-regular fa-copy"></i></button></div>
-                                <textarea id="post_code_${res}" readonly class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-[10px] font-mono text-blue-300 h-20 resize-none outline-none"></textarea>
+                                <div class="flex justify-between mb-1"><span class="text-xs font-semibold text-slate-500 uppercase">Code</span><button onclick="copyToClipboard('post_code_${res}')" class="text-xs text-slate-400 hover:text-white"><i class="fa-regular fa-copy"></i></button></div>
+                                <textarea id="post_code_${res}" readonly class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs font-mono text-blue-300 h-24 resize-none outline-none"></textarea>
                             </div>
                         </div>
                     </div>
                 `;
-                container.innerHTML += card;
             });
-            lucide.createIcons();
         }
 
         function syncPostLabels(source) {
-            const key = source.dataset.key;
-            document.querySelectorAll(`.post-label[data-key="${key}"]`).forEach(el => {
-                if(el !== source) el.value = source.value;
-            });
-            updatePostDlOutputs();
+            document.querySelectorAll(`.post-label[data-key="${source.dataset.key}"]`).forEach(el => { if(el !== source) el.value = source.value; });
+            updateAllOutputs();
         }
 
-        function updatePostDlOutputs() {
-            const masterTitle = document.getElementById('post_master_title').value;
+        function updateAllOutputs() {
+            const masterTitle = document.getElementById('post-title').value;
 
             RESOLUTIONS.forEach(res => {
-                // Title
                 const titleEl = document.getElementById(`post_title_${res}`);
-                titleEl.textContent = masterTitle ? `${masterTitle} ${res}` : '...';
+                if (masterTitle) {
+                    titleEl.innerText = `${masterTitle} ${res}`;
+                    titleEl.classList.remove('italic', 'text-slate-600');
+                } else {
+                    titleEl.innerHTML = '<span class="text-slate-600 italic">Enter Post Title...</span>';
+                }
 
-                // Content
                 let code = "";
                 let count = 0;
 
-                LINK_CONFIG.forEach(field => {
+                LINK_FIELDS.forEach(field => {
                     const urlInput = document.querySelector(`.post-url[data-res="${res}"][data-key="${field.key}"]`);
                     const lblInput = document.querySelector(`.post-label[data-key="${field.key}"]`);
-                    
                     let url = urlInput.value.trim();
                     const lbl = lblInput.value.trim();
 
@@ -533,44 +546,41 @@
             });
         }
 
-        function resetPostDl() {
+        function resetAllPosts() {
             if(!confirm("Clear all fields?")) return;
-            document.getElementById('post_master_title').value = '';
+            document.getElementById('post-title').value = '';
             document.querySelectorAll('.post-url').forEach(e => e.value = '');
-            updatePostDlOutputs();
+            updateAllOutputs();
         }
 
-        // ================= TOOL 3: EPISODE GENERATOR =================
+        // ================= TOOL 3: EPISODE LINKS LOGIC (Preserved) =================
         let episodeCount = 1;
 
-        function addEpisodeField() {
+        function addEpisode() {
             episodeCount++;
-            const container = document.getElementById('ep_inputs_container');
+            const container = document.getElementById('episode_container');
             const num = episodeCount.toString().padStart(2, '0');
             const div = document.createElement('div');
             div.className = 'flex gap-0 group';
             div.innerHTML = `
-                <span class="inline-flex items-center px-4 rounded-l-lg border border-r-0 border-slate-600 bg-slate-700 text-slate-300 text-sm w-28 justify-center">Episode ${num}</span>
-                <input type="text" class="ep-input w-full bg-slate-800 border border-slate-600 rounded-r-lg px-4 py-2 text-white focus:ring-indigo-500 outline-none transition-colors" placeholder="https://...">
+                <span class="inline-flex items-center px-4 rounded-l-lg border border-r-0 border-gray-600 bg-gray-700 text-gray-300 text-sm w-28 justify-center">Episode ${num}</span>
+                <input type="text" class="ep-input w-full bg-gray-900 border border-gray-600 rounded-r-lg px-4 py-2 text-white focus:ring-1 focus:ring-indigo-500 outline-none transition-colors" placeholder="https://...">
             `;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
 
-        function removeEpisodeField() {
-            const container = document.getElementById('ep_inputs_container');
-            if(episodeCount > 1) {
-                container.removeChild(container.lastElementChild);
-                episodeCount--;
-            }
+        function removeEpisode() {
+            const container = document.getElementById('episode_container');
+            if(episodeCount > 1) { container.removeChild(container.lastElementChild); episodeCount--; }
         }
 
-        function setEpSource(val) {
+        function setEpSourceType(val) {
             document.getElementById('ep_source_type').value = val;
         }
 
-        function generateEpisodeCode() {
-            const title = document.getElementById('ep_title').value.trim();
+        function generateEpCode() {
+            const title = document.getElementById('ep_post_title').value.trim();
             const source = document.getElementById('ep_source_type').value.trim();
             const inputs = document.querySelectorAll('.ep-input');
             
@@ -590,24 +600,18 @@
 
             if(!hasLinks) return showToast('Add at least one link', 'error');
 
-            document.getElementById('out_ep_title').value = `${title} {${source}}`;
-            document.getElementById('out_ep_content').value = code;
+            document.getElementById('ep_result_title').value = `${title} {${source}}`;
+            document.getElementById('ep_result_content').value = code;
             showToast('Episodes Generated!');
         }
 
-        function resetEpisodeDl() {
-            document.getElementById('ep_title').value = '';
+        function resetEpCode() {
+            document.getElementById('ep_post_title').value = '';
             document.getElementById('ep_source_type').value = '';
-            document.getElementById('out_ep_title').value = '';
-            document.getElementById('out_ep_content').value = '';
-            
-            const container = document.getElementById('ep_inputs_container');
-            container.innerHTML = `
-                <div class="flex gap-0 group">
-                    <span class="inline-flex items-center px-4 rounded-l-lg border border-r-0 border-slate-600 bg-slate-700 text-slate-300 text-sm w-28 justify-center">Episode 01</span>
-                    <input type="text" class="ep-input w-full bg-slate-800 border border-slate-600 rounded-r-lg px-4 py-2 text-white focus:ring-indigo-500 outline-none transition-colors" placeholder="https://...">
-                </div>
-            `;
+            document.getElementById('ep_result_title').value = '';
+            document.getElementById('ep_result_content').value = '';
+            const container = document.getElementById('episode_container');
+            container.innerHTML = `<div class="flex gap-0 group"><span class="inline-flex items-center px-4 rounded-l-lg border border-r-0 border-gray-600 bg-gray-700 text-gray-300 text-sm w-28 justify-center">Episode 01</span><input type="text" class="ep-input w-full bg-gray-900 border border-gray-600 rounded-r-lg px-4 py-2 text-white focus:ring-1 focus:ring-indigo-500 outline-none transition-colors" placeholder="https://..."></div>`;
             episodeCount = 1;
         }
 
