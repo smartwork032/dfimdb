@@ -101,8 +101,8 @@
                         <div class="relative">
                             <input type="text" id="quality_size" 
                                 class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition text-white font-mono text-sm"
-                                placeholder="480p [400MB] || 720p [800MB] || 1080p [2.GB]"
-                                value="480p [] || 720p [] || 1080p []">
+                                placeholder="480p [] || 720p [] || 1080p []"
+                                value="480p [400MB] || 720p [900MB] || 1080p [2.4GB]">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                 <i class="fa-solid fa-layer-group text-gray-500"></i>
                             </div>
@@ -143,14 +143,18 @@
                         <input type="text" id="subtitle" value="ESubs" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-blue-500 outline-none text-sm">
                     </div>
 
-                    <!-- Row 3 -->
+                    <!-- Row 3: Screenshots (Updated with Multiple Field Logic) -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Screenshot URL</label>
-                        <div class="flex">
-                            <input type="text" id="screenshot" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:ring-blue-500 outline-none text-sm placeholder-gray-600" placeholder="https://image.url/shot.jpg">
-                            <span class="inline-flex items-center px-3 bg-gray-700 border border-l-0 border-gray-700 rounded-r-lg text-gray-400">
-                                <i class="fa-regular fa-image"></i>
-                            </span>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-sm font-medium text-gray-400">Screenshot URLs</label>
+                        </div>
+                        <div id="screenshot_container" class="space-y-2">
+                            <div class="flex">
+                                <input type="text" class="screenshot-input w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:ring-blue-500 outline-none text-sm placeholder-gray-600" placeholder="https://image.url/shot1.jpg">
+                                <button type="button" onclick="addScreenshotInput()" class="inline-flex items-center px-3 bg-blue-600 border border-l-0 border-blue-600 rounded-r-lg text-white hover:bg-blue-500 transition" title="Add another screenshot">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -218,6 +222,20 @@
 
         document.getElementById('btn_generate').addEventListener('click', generatePost);
 
+        // Add Screenshot Input Field
+        function addScreenshotInput() {
+            const container = document.getElementById('screenshot_container');
+            const div = document.createElement('div');
+            div.className = 'flex';
+            div.innerHTML = `
+                <input type="text" class="screenshot-input w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:ring-blue-500 outline-none text-sm placeholder-gray-600" placeholder="https://image.url/shot.jpg">
+                <button type="button" onclick="this.parentElement.remove()" class="inline-flex items-center px-3 bg-red-600 border border-l-0 border-red-600 rounded-r-lg text-white hover:bg-red-500 transition" title="Remove">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
         async function generatePost() {
             const imdbIdInput = document.getElementById('imdb_id').value.trim();
             // Handle both full URL and raw ID
@@ -259,7 +277,8 @@
             const lang = document.getElementById('lang').value;
             const source = document.getElementById('source').value;
             const subtitle = document.getElementById('subtitle').value;
-            const screenshot = document.getElementById('screenshot').value;
+            // Get all screenshot inputs
+            const screenshotInputs = document.querySelectorAll('.screenshot-input');
             const qualitySizeString = document.getElementById('quality_size').value;
 
             // Parse Quality/Size String (e.g., "480p [400MB] || 720p [1GB]")
@@ -306,8 +325,18 @@
             // Replicating the specific HTML structure from original file
             let contentHtml = `<p><b>Download ${data.Title} (${data.Year}) Full Movie</b>. This is a <strong>${lang}</strong> movie and is available in ${qualityLinksHtml} Qualities For Your Mobile/tablet/Computer. This movie is based on <strong>${data.Genre}</strong>.</p><br><strong>${siteTitle} </strong>Provide You Super Quality Of Movies and WEB Series. We Provide Google Drive Direct Download Links For Fast And Secure Download. You Can Join us on Telegram For Latest Updates.<br> [imdb style="dark"]${data.imdbID}[/imdb]<br><h3 style="text-align: center;">Download ${data.Title} (${data.Year}) ${lang} Full Movie ~ ${siteTitle}</h3><p align="center"><b>IMDB Rating</b>: ${data.imdbRating}<br><strong>Directed:</strong> ${data.Director}<br><strong>Released Date:</strong> ${data.Released}<br><strong>Genre:</strong> ${data.Genre}<br><strong>Film Stars:</strong> ${data.Actors}<br><strong>Plot:</strong> ${data.Plot}</p><hr /><img class="aligncenter" src="https://i.imgur.com/ZuRn1nF.png" /><br>`;
 
-            if (screenshot) {
-                contentHtml += `<img class="aligncenter" src="${screenshot}" /><hr />`;
+            // Append Screenshots Loop
+            let hasScreenshots = false;
+            screenshotInputs.forEach(input => {
+                const val = input.value.trim();
+                if(val) {
+                    contentHtml += `<img class="aligncenter" src="${val}" /><br>`;
+                    hasScreenshots = true;
+                }
+            });
+
+            if (hasScreenshots) {
+                contentHtml += `<hr />`;
             }
 
             contentHtml += `<img class="aligncenter" src="https://i.imgur.com/4VtZS20.png" />`;
