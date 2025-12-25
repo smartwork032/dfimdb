@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Winter Celebration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;600&display=swap" rel="stylesheet">
+    <style>
+        /* Modern Reset & Base Styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #020204; /* Deep dark background */
+            background: radial-gradient(circle at bottom, #1b2735 0%, #090a0f 100%);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Canvas Positioning */
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #canvas-fireworks {
+            z-index: 1;
+        }
+
+        #canvas-snow {
+            z-index: 2;
+            pointer-events: none; /* Let clicks pass through to potential interactive elements */
+        }
+
+        /* Centered Text Container */
+        .content-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            text-align: center;
+            width: 100%;
+            pointer-events: none; /* Allow seeing fireworks behind */
+        }
+
+        /* Modern Typography Animation */
+        .welcome-text {
+            color: #ffffff;
+            font-size: clamp(3rem, 10vw, 8rem); /* Responsive font size */
+            font-weight: 200;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin: 0;
+            opacity: 0;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+            animation: fadeInZoom 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .welcome-text span {
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+                         0 0 40px rgba(74, 144, 226, 0.6);
+        }
+
+        .sub-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: clamp(0.8rem, 2vw, 1.2rem);
+            margin-top: 20px;
+            letter-spacing: 0.1em;
+            opacity: 0;
+            animation: slideUp 1.5s ease-out 1s forwards;
+        }
+
+        /* Animations */
+        @keyframes fadeInZoom {
+            0% {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+                filter: blur(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Layer 1: Fireworks -->
+    <canvas id="canvas-fireworks"></canvas>
+
+    <!-- Layer 2: Snow -->
+    <canvas id="canvas-snow"></canvas>
+
+    <!-- Layer 3: Text Content -->
+    <div class="content-wrapper">
+        <h1 class="welcome-text">Wel<span>come</span></h1>
+        <p class="sub-text">Enjoy the view</p>
+    </div>
+
+    <script>
+        /**
+         * FIREWORKS SYSTEM
+         */
+        const fwCanvas = document.getElementById('canvas-fireworks');
+        const fwCtx = fwCanvas.getContext('2d');
+        let fwWidth = window.innerWidth;
+        let fwHeight = window.innerHeight;
+        fwCanvas.width = fwWidth;
+        fwCanvas.height = fwHeight;
+
+        const fireworks = [];
+        const particles = [];
+
+        // Utility
+        const random = (min, max) => Math.random() * (max - min) + min;
+
+        class Firework {
+            constructor(sx, sy, tx, ty) {
+                this.x = sx;
+                this.y = sy;
+                this.sx = sx;
+                this.sy = sy;
+                this.tx = tx;
+                this.ty = ty;
+                this.distanceToTarget = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2));
+                this.distanceTraveled = 0;
+                this.coordinates = [];
+                this.coordinateCount = 3;
+                while (this.coordinateCount--) {
+                    this.coordinates.push([this.x, this.y]);
+                }
+                this.angle = Math.atan2(ty - sy, tx - sx);
+                this.speed = 2;
+                this.acceleration = 1.05;
+                this.brightness = random(50, 70);
+                // Target radius circle
+                this.targetRadius = 1;
+            }
+
+            update(index) {
+                this.coordinates.pop();
+                this.coordinates.unshift([this.x, this.y]);
+
+                // Speed up
+                this.speed *= this.acceleration;
+
+                const vx = Math.cos(this.angle) * this.speed;
+                const vy = Math.sin(this.angle) * this.speed;
+                this.distanceTraveled = Math.sqrt(Math.pow(this.sx - this.x - vx, 2) + Math.pow(this.sy - this.y - vy, 2));
+
+                if (this.distanceTraveled >= this.distanceToTarget) {
+                    createParticles(this.tx, this.ty);
+                    fireworks.splice(index, 1);
+                } else {
+                    this.x += vx;
+                    this.y += vy;
+                }
+            }
+
+            draw() {
+                fwCtx.beginPath();
+                fwCtx.moveTo(this.coordinates[this.coordinates.length - 1][0], this.coordinates[this.coordinates.length - 1][1]);
+                fwCtx.lineTo(this.x, this.y);
+                fwCtx.strokeStyle = 'hsl(' + hue + ', 100%, ' + this.brightness + '%)';
+                fwCtx.stroke();
+            }
+        }
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.coordinates = [];
+                this.coordinateCount = 5;
+                while (this.coordinateCount--) {
+                    this.coordinates.push([this.x, this.y]);
+                }
+                this.angle = random(0, Math.PI * 2);
+                this.speed = random(1, 10);
+                this.friction = 0.95;
+                this.gravity = 1;
+                this.hue = random(hue - 50, hue + 50);
+                this.brightness = random(50, 80);
+                this.alpha = 1;
+                this.decay = random(0.015, 0.03);
+            }
+
+            update(index) {
+                this.coordinates.pop();
+                this.coordinates.unshift([this.x, this.y]);
+                this.speed *= this.friction;
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed + this.gravity;
+                this.alpha -= this.decay;
+
+                if (this.alpha <= this.decay) {
+                    particles.splice(index, 1);
+                }
+            }
+
+            draw() {
+                fwCtx.beginPath();
+                fwCtx.moveTo(this.coordinates[this.coordinates.length - 1][0], this.coordinates[this.coordinates.length - 1][1]);
+                fwCtx.lineTo(this.x, this.y);
+                fwCtx.strokeStyle = 'hsla(' + this.hue + ', 100%, ' + this.brightness + '%, ' + this.alpha + ')';
+                fwCtx.stroke();
+            }
+        }
+
+        function createParticles(x, y) {
+            let particleCount = 30;
+            while (particleCount--) {
+                particles.push(new Particle(x, y));
+            }
+        }
+
+        let hue = 120;
+        let limiterTotal = 5;
+        let limiterTick = 0;
+        let timerTotal = 80;
+        let timerTick = 0;
+
+        function loopFireworks() {
+            // Trail effect
+            fwCtx.globalCompositeOperation = 'destination-out';
+            fwCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            fwCtx.fillRect(0, 0, fwWidth, fwHeight);
+            fwCtx.globalCompositeOperation = 'lighter';
+
+            hue += 0.5;
+
+            // Draw fireworks
+            let i = fireworks.length;
+            while (i--) {
+                fireworks[i].draw();
+                fireworks[i].update(i);
+            }
+
+            // Draw particles
+            let j = particles.length;
+            while (j--) {
+                particles[j].draw();
+                particles[j].update(j);
+            }
+
+            // Launch automatic fireworks
+            if (timerTick >= timerTotal) {
+                fireworks.push(new Firework(fwWidth / 2, fwHeight, random(0, fwWidth), random(0, fwHeight / 2)));
+                timerTick = 0;
+            } else {
+                timerTick++;
+            }
+
+            // Mouse interaction limit
+            if (limiterTick >= limiterTotal) {
+                limiterTick = 0;
+            } else {
+                limiterTick++;
+            }
+
+            requestAnimationFrame(loopFireworks);
+        }
+
+        /**
+         * SNOW SYSTEM
+         */
+        const snCanvas = document.getElementById('canvas-snow');
+        const snCtx = snCanvas.getContext('2d');
+        let snWidth = window.innerWidth;
+        let snHeight = window.innerHeight;
+        snCanvas.width = snWidth;
+        snCanvas.height = snHeight;
+
+        const snowflakes = [];
+        const maxSnowflakes = 150;
+
+        class Snowflake {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * snWidth;
+                this.y = Math.random() * -snHeight; // Start above screen
+                this.vx = Math.random() * 1 - 0.5; // Drift left/right
+                this.vy = Math.random() * 1 + 1;   // Fall speed
+                this.size = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.3;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Reset if out of bounds
+                if (this.y > snHeight) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                snCtx.beginPath();
+                snCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                snCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                snCtx.fill();
+            }
+        }
+
+        // Initialize Snow
+        for (let i = 0; i < maxSnowflakes; i++) {
+            snowflakes.push(new Snowflake());
+        }
+
+        function loopSnow() {
+            snCtx.clearRect(0, 0, snWidth, snHeight);
+            
+            snowflakes.forEach(flake => {
+                flake.update();
+                flake.draw();
+            });
+
+            requestAnimationFrame(loopSnow);
+        }
+
+        /**
+         * GLOBAL INIT & EVENTS
+         */
+        
+        // Start Loops
+        loopFireworks();
+        loopSnow();
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            fwWidth = window.innerWidth;
+            fwHeight = window.innerHeight;
+            fwCanvas.width = fwWidth;
+            fwCanvas.height = fwHeight;
+
+            snWidth = window.innerWidth;
+            snHeight = window.innerHeight;
+            snCanvas.width = snWidth;
+            snCanvas.height = snHeight;
+        });
+
+        // Click to launch firework
+        window.addEventListener('mousedown', (e) => {
+            fireworks.push(new Firework(fwWidth / 2, fwHeight, e.clientX, e.clientY));
+        });
+
+    </script>
+</body>
+</html>
